@@ -5,10 +5,9 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from loguru import logger
 from assistants import process_thread_with_assistant
-from dotenv import load_dotenv
 import os
 
-load_dotenv()
+
 logger.debug("Environment variables loaded from .env file")
 
 # Configure Loguru

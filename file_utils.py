@@ -1,12 +1,11 @@
 import os
 from openai import AsyncOpenAI
-from dotenv import load_dotenv
 from loguru import logger
 
 logger.debug("Loading environment variables from .env file")
-load_dotenv()
 
-api_key = os.getenv("OPENAI_API_KEY")
+
+api_key = os.environ.get("OPENAI_API_KEY")
 logger.debug(f"Retrieved API key from environment: {api_key}")
 
 client = AsyncOpenAI(api_key=api_key)

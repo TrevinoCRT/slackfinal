@@ -3,17 +3,16 @@ import json
 import os
 from openai import AsyncOpenAI
 from loguru import logger
-from dotenv import load_dotenv
 from file_utils import replace_file_ids_with_urls
 import re
-load_dotenv()
+
 
 # Global variables
 global_thread_id = None
 
-api_key = os.getenv("OPENAI_API_KEY")
+api_key = os.environ.get("OPENAI_API_KEY")
 
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = AsyncOpenAI(api_key=api_key)
 
 def format_for_slack(text):
     """Formats text for Slack, replacing Markdown elements for better compatibility.

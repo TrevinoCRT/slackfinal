@@ -1,7 +1,0 @@
-2024-06-06T09:58:25.386984-0700 DEBUG Loguru configured with file rotation and retention
-2024-06-06T09:58:25.387783-0700 DEBUG Flask app initialized
-2024-06-06T09:58:25.657328-0700 DEBUG Slack app initialized with token
-2024-06-06T09:58:25.659695-0700 DEBUG SocketModeHandler initialized with app token
-2024-06-06T09:58:25.659830-0700 DEBUG Authorized user IDs loaded: U0581M58KAM,U041CE9VBU6,U0428Q2PGUQ
-2024-06-06T09:58:25.659921-0700 DEBUG Assistant IDs and vectorstores defined
-2024-06-06T09:58:25.660058-0700 DEBUG Default assistant ID set to: asst_qPZ55zXeulxiaLXyCJlHM0LD

@@ -1,15 +1,2 @@
-google-cloud-sdk/
-pycache/
-ServiceAccountKey.json
-SlackOpenAIDrumbeat.code-workspace
-.DS_Store
+/__pycache__
 .env
-cloudbuild.yaml
-debug.log
-jira_board_info.py
-logger_config.py
-miro_board_info.py
-miro_data_assistant.py
-requirements.txt
-shared_resources.pycache
-.cursorignore

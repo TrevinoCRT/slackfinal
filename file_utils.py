@@ -2,9 +2,6 @@ import os
 from openai import AsyncOpenAI
 from loguru import logger
 
-logger.debug("Loading environment variables from .env file")
-
-
 api_key = os.environ.get("OPENAI_API_KEY")
 logger.debug(f"Retrieved API key from environment: {api_key}")
 

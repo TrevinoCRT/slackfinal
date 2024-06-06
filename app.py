@@ -8,10 +8,8 @@ from assistants import process_thread_with_assistant
 import os
 
 
-logger.debug("Environment variables loaded from .env file")
-
 # Configure Loguru
-logger.add("file_{time}.log", rotation="1 week", retention="1 month", level="DEBUG", format="{time} {level} {message}")
+logger.add(rotation="1 week", retention="1 month", level="DEBUG", format="{time} {level} {message}")
 logger.debug("Loguru configured with file rotation and retention")
 
 # Initialize Flask app

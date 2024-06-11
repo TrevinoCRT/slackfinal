@@ -6,12 +6,7 @@ from loguru import logger
 from file_utils import replace_file_ids_with_urls
 import re
 
-
-# Global variables
-global_thread_id = None
-
 api_key = os.environ.get("OPENAI_API_KEY")
-
 client = AsyncOpenAI(api_key=api_key)
 
 def format_for_slack(text):
@@ -62,21 +57,20 @@ async def process_tool_call(tool_call, from_user):
         "output": function_output_str
     }
 
-async def process_thread_with_assistant(query, assistant_id, model="gpt-4o", from_user=None):
-    global global_thread_id
+async def process_thread_with_assistant(query, assistant_id, model="gpt-4o", from_user=None, thread_id=None):
     response_texts = []
     response_files = []
     in_memory_files = []
     try:
-        if not global_thread_id:
+        if not thread_id:
             logger.debug("Creating a new thread for the user query...")
             thread = await client.beta.threads.create()
-            global_thread_id = thread.id
-            logger.debug(f"New thread created with ID: {global_thread_id}")
+            thread_id = thread.id
+            logger.debug(f"New thread created with ID: {thread_id}")
         
-        logger.debug(f"Adding the user query as a message to the thread with ID: {global_thread_id}, query: {query}")
+        logger.debug(f"Adding the user query as a message to the thread with ID: {thread_id}, query: {query}")
         await client.beta.threads.messages.create(
-            thread_id=global_thread_id,
+            thread_id=thread_id,
             role="user",
             content=query
         )
@@ -84,7 +78,7 @@ async def process_thread_with_assistant(query, assistant_id, model="gpt-4o", fro
 
         logger.debug(f"Creating a run to process the thread with the assistant ID: {assistant_id}, model: {model}")
         run = await client.beta.threads.runs.create(
-            thread_id=global_thread_id,
+            thread_id=thread_id,
             assistant_id=assistant_id,
             model=model
         )
@@ -93,7 +87,7 @@ async def process_thread_with_assistant(query, assistant_id, model="gpt-4o", fro
         while True:
             logger.debug(f"Checking the status of the run with ID: {run.id}")
             run_status = await client.beta.threads.runs.retrieve(
-                thread_id=global_thread_id,
+                thread_id=thread_id,
                 run_id=run.id
             )
             logger.debug(f"Current status of the run: {run_status.status}")
@@ -108,16 +102,16 @@ async def process_thread_with_assistant(query, assistant_id, model="gpt-4o", fro
 
                 logger.debug(f"Submitting tool outputs for run ID: {run.id}")
                 await client.beta.threads.runs.submit_tool_outputs(
-                    thread_id=global_thread_id,
+                    thread_id=thread_id,
                     run_id=run.id,
                     tool_outputs=tool_outputs
                 )
                 logger.debug("Tool outputs submitted.")
 
             elif run_status.status in ["completed", "failed", "cancelled"]:
-                logger.debug(f"Fetching the latest message added by the assistant for thread ID: {global_thread_id}")
+                logger.debug(f"Fetching the latest message added by the assistant for thread ID: {thread_id}")
                 messages_response = await client.beta.threads.messages.list(
-                    thread_id=global_thread_id,
+                    thread_id=thread_id,
                     order="desc"
                 )
                 messages = messages_response.data  # Access the data attribute directly
@@ -133,7 +127,7 @@ async def process_thread_with_assistant(query, assistant_id, model="gpt-4o", fro
                         if content.type == "text":
                             text_value = content.text.value
                             logger.debug(f"Original text value: {text_value}")
-                            text_value = await replace_file_ids_with_urls(text_value)  # Use await for async function
+                            text_value = await replace_file_ids_with_urls(text_value)
                             logger.debug(f"Text value after replacing file IDs with URLs: {text_value}")
 
                             # Format the text for Slack
@@ -196,9 +190,9 @@ async def process_thread_with_assistant(query, assistant_id, model="gpt-4o", fro
                 break
             await asyncio.sleep(1)
 
-        logger.debug(f"Returning response texts: {response_texts} and in-memory files: {in_memory_files}")
-        return {"text": response_texts, "in_memory_files": in_memory_files}
+        logger.debug(f"Returning response texts: {response_texts} and in-memory files: {in_memory_files}, Thread ID: {thread_id}")
+        return {"text": response_texts, "in_memory_files": in_memory_files, "thread_id": thread_id}
 
     except Exception as e:
         logger.error(f"An error occurred: {e}")
-        return {"text": [], "in_memory_files": []}
+        return {"text": [], "in_memory_files": [], "thread_id": thread_id}
